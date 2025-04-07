@@ -3,3 +3,15 @@ Andmed - see on töödeldud informatsioon
 Haldus - администрирование сети / обслуживание
  andmebaaside haldussüstemid - системы администрирования БД - программы для работы с БД
 MS SQL Server, Oracle, mariaDB/phpMyadmin, Access
+
+--------------------------------------------------------------
+Tabel/tablid -таблица
+rida / read -строка/строки
+veerg /veerud - столбец/столбцы
+rida= kirjed-записи
+veerg=väli-поля
+päring - запрос
+käivita paring - запусти запрос - EXECUTE QUERY!
+Värskenda - uuenda-обновлять
+kustuta- стирать 
+loo-создать
