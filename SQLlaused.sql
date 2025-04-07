@@ -23,3 +23,19 @@ SELECT * FROM inimene;
 
 --tabeli kustutamine
 DROp table inimene;
+
+--andmete lisamine
+--DDL - datadefinition language
+--DML - data manipulation language
+
+INSERT INTO inimene(nimi, synniaeg, telefon, pikkus, opilaskodu)
+VALUES
+('Dima Kaskk', '2021-12-29', '2568951', 94.5, 0),
+('Kasper Kaskk', '2021-12-28', '2568953', 93.5, 0),
+('Danik Kaskk', '2021-12-27', '2568954', 92.5, 0),
+('Peeter Kaskk', '2021-12-26', '2568955', 91.5, 0)
+
+SELECT * FROM inimene;
+
+DELETE FROM inimene
+WHERE inimeneID=3
