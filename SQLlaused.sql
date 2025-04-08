@@ -11,9 +11,9 @@ CREATE DATABASE solovjovLOGITpv23;
 USE solovjovLOGITpv23;
 
 --tabeli loomine
---identity(1,1)-ise taidab tabeli 1,2,3...
+--AUTO_INCREMENT-ise taidab tabeli 1,2,3...
 CREATE TABLE inimene(
-inimeneID int Primary key identity(1,1),
+inimeneID int Primary key AUTO_INCREMENT,
 nimi varchar(50) unique,
 synniaeg date,
 telefon char(12),
@@ -41,7 +41,7 @@ SELECT * FROM inimene;
 DELETE FROM inimene
 WHERE inimeneID=3
 CREATE TABLE elukoht(
-elukohtID int PRIMARY KEY IDENTITY(1,1),
+elukohtID int PRIMARY KEY AUTO_INCREMENT,
 elukoht varchar(50) UNIQUE,
 maakond varchar(50)
 );
@@ -56,9 +56,7 @@ VALUES ('TARTU', 'TARTUMAA'),
 ALTER TABLE inimene ADD elukohtID int;
 SELECT * from inimene;
 --foreign key lisamine
-alter table inimene add constraint fk_elukoht
-foreign key (elukohtID) references elukoht(elukohtID);
-
+ALTER TABLE inimene ADD loomID int;
 
 
 SELECT * FROM elukoht;
@@ -84,7 +82,7 @@ on i.elukohtID=e.elukohtID;
 
 
 CREATE TABLE auto(
-autoID int PRIMARY KEY IDENTITY(1,1),
+autoID int PRIMARY KEY AUTO_INCREMENT,
 autoNR varchar (6) UNIQUE,
 mudel varchar(50),
 mark varchar(50),
