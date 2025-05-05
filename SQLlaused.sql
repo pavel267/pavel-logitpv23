@@ -153,3 +153,7 @@ grant alter to kasutajapavel;
 --kasutaja saab luua tabeleid 
 grant create table to kasutajapavel
 grant control on schema ::dbo to kasutajapavel 
+
+Select * from uusTabel 
+alter table ussTabel add testvanus int;
+alter table uusTabel drop column testvanus;
