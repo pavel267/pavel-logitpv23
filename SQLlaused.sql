@@ -127,3 +127,29 @@ DROp table auto;
 
 DELETE FROM inimene
 WHERE inimeneID=3
+
+create database Pavel
+
+
+use pavel
+create table uusTabel(
+ id int primary key identity(1,1),
+testnimi varchar(25));
+
+Insert into uusTabel(testnimi)
+values ('test');
+Select * from uusTabel
+
+--lisabuus veerg
+Alter table uusTabel ADD testvanus int;
+--lustutab veerg
+alter table uusTabel drop testvanus;
+--teeme kasutaja kes saab tabeli strukteeri muuta
+Grant alter on uusTabel to kasutajapavel;
+
+grant alter to kasutajapavel;
+
+
+--kasutaja saab luua tabeleid 
+grant create table to kasutajapavel
+grant control on schema ::dbo to kasutajapavel 
