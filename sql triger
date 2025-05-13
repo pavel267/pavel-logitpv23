@@ -79,3 +79,159 @@ on deleted.toodeID=inserted.toodeID;
 --kontroll
 update toode set toodeHind=4.00
 where toodeNimetus='fanta'
+create database paveltrigger
+use paveltrigger
+
+
+CREATE TABLE practikajuhendaja (
+practikajuhendajaID INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+eesnimi VARCHAR(20),
+perekonnanimi VARCHAR(20),
+sunniaeg date,
+telefon int unique);
+
+CREATE TABLE praktikabaas (
+practikabaasID int NOT NULL PRIMARY KEY IDENTITY(1,1),
+firmaID int,
+praktikatingimused varchar(20),
+arvutiprogramm varchar(20),
+juhendajaID int,
+FOREIGN KEY (firmaID) REFERENCES firma(firmaID),
+FOREIGN KEY (juhendajaID) REFERENCES practikajuhendaja(practikajuhendajaID)
+);
+
+INSERT INTO firma (firmanimi, address, telefon) VALUES
+('Tech OÜ', 'Pärnu mnt 100', '5551 2345'),
+('SoftSys AS', 'Tartu mnt 45', '5552 6789'),
+('Digimaailm', 'Narva mnt 12', '5553 4567'),
+('Arvutikoda', 'Põhja pst 1', '5554 7890'),
+('Koodimeistrid', 'Telliskivi 60', '5555 1234');
+
+
+
+select * from firma
+
+INSERT INTO practikajuhendaja (eesnimi, perekonnanimi, sunniaeg, telefon) VALUES
+('Mari', 'Tamm', '1980-05-12', '55561111'),
+('Jaan', 'Kask', '1975-03-22', '55562222'),
+('Liis', 'Vaher', '1990-09-18', '55563333'),
+('Toomas', 'Rein', '1982-11-05', '55564444'),
+('Annika', 'Saar', '1988-06-30', '55565555');
+
+
+
+select * from practikajuhendaja
+
+
+INSERT INTO praktikabaas (firmaID, praktikatingimused, arvutiprogramm, juhendajaID) VALUES
+(1, 'Täistööaeg 3 kuud', 'MS Office', 6),
+(2, 'Ostööaeg 2 kuud', 'AutoCAD', 6),
+(3, 'Täistööaeg 1 kuu', 'Photoshop', 6),
+(4, 'Kaugõpe 2 kuud', 'Visual Studio', 6),
+(5, 'Täistööaeg 4 kuud', 'Excel, Word', 6);
+
+
+
+
+SELECT * FROM firma;
+drop table practikajuhendaja;
+
+CREATE TABLE praktikabaas (
+    practikabaasID INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+    firmaID INT,
+    praktikatingimused VARCHAR(20),
+    arvutiprogramm VARCHAR(20),
+    juhendajaID INT,
+    FOREIGN KEY (firmaID) REFERENCES firma(firmaID),
+    FOREIGN KEY (juhendajaID) REFERENCES practikajuhendaja(practikajuhendajaID)
+);
+
+
+
+SELECT * 
+FROM firma 
+WHERE firmanimi LIKE '%a%';
+
+
+SELECT * 
+FROM praktikabaas p
+JOIN firma f ON p.firmaID = f.firmaID
+ORDER BY f.firmanimi;
+
+
+
+select * from 
+
+SELECT f.firmanimi, COUNT(p.practikabaasID) AS firmaKogus
+FROM firma f
+JOIN praktikabaas p ON f.firmaID = p.firmaID
+GROUP BY f.firmanimi;
+
+
+SELECT * 
+FROM practikajuhendaja 
+HAVING MONTH(sunniaeg) IN (9, 10, 11);
+
+
+
+
+
+CREATE TABLE Praktikabaas_logi (
+    id int  PRIMARY KEY identity(1,1),
+    aeg  datetime,
+    tegevus varchar(100),
+    andmed varchar(100),
+	kasutaja varchar (100)
+);
+
+drop table Praktikabaas_logi
+
+CREATE TRIGGER PraktikaUpdate
+ON praktikabaas
+FOR INSERT
+AS
+BEGIN
+    INSERT INTO Praktikabaas_logi (aeg, tegevus, andmed, kasutaja)
+    SELECT 
+        GETDATE(),                                              
+        'praktikabaasi on lisatud',                             
+        'praktikabaasID = ' + CAST(inserted.practikabaasID AS VARCHAR),  
+        SYSTEM_USER                                             
+    FROM inserted;
+END;
+
+drop trigger PraktikaUpdate
+use paveltrigger
+
+create TRIGGER PraktikaUpdate
+ON praktikabaas
+FOR UPDATE
+AS
+CREATE TRIGGER [dbo].[PraktikaUPDATE]
+ON [dbo].[praktikabaas]
+FOR UPDATE
+AS
+BEGIN
+    INSERT INTO Praktikabaas_logi (tegevus, aeg, andmed, kasutaja)
+    SELECT
+        'praktikabaasis on uuendatud',
+        GETDATE(),
+        CONCAT(
+            'PraktikabaasID=', deleted.practikabaasID, ', ',
+            'Vana firma=', f2.firmanimi, ', ',
+            'Uus firma=', f1.firmanimi, ', ',
+            'Juhendaja enne=', p2.eesnimi, ' ', p2.perekonnanimi, ', ',
+            'Juhendaja pärast=', p1.eesnimi, ' ', p1.perekonnanimi, ', ',
+            'Vana arvutiprogramm=', deleted.arvutiprogramm, ', ',
+            'Uus arvutiprogramm=', inserted.arvutiprogramm, ', ',
+            'Vana praktikatingimused=', deleted.praktikatingimused, ', ',
+            'Uued praktikatingimused=', inserted.praktikatingimused
+        ),
+        SYSTEM_USER
+    FROM deleted
+    INNER JOIN inserted ON deleted.practikabaasID = inserted.practikabaasID
+    INNER JOIN firma f1 ON f1.firmaID = inserted.firmaID
+    INNER JOIN firma f2 ON f2.firmaID = deleted.firmaID
+    INNER JOIN praktikajuhendaja p1 ON p1.praktikajuhendajaID = inserted.juhendajaID
+    INNER JOIN praktikajuhendaja p2 ON p2.praktikajuhendajaID = deleted.juhendajaID;
+END;
