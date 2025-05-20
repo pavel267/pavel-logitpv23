@@ -1,0 +1,168 @@
+create database booklibrary2
+
+
+CREATE TABLE Authors (
+    author_id INT  PRIMARY KEY identity(1,1),
+    name VARCHAR(255) NOT NULL,
+    birth_year INT
+);
+
+
+CREATE TABLE Books (
+    book_id INT  PRIMARY KEY identity(1,1),
+    title VARCHAR(255) NOT NULL,
+    published_year INT,
+    author_id INT,
+    FOREIGN KEY (author_id) REFERENCES Authors(author_id)
+);
+use booklibrary2
+
+INSERT INTO Books (title, published_year, author_id) VALUES
+('Keisri hull', 1978, 1),
+('Rehepapp', 2000, 2),
+('Ahasveeruse uni', 2001, 3),
+('Seitsmes rahukevad', 1985, 1),
+('Varjuteater', 2010, 4),
+('Mandala', 1999, 5);
+
+
+INSERT INTO Authors (name, birth_year) VALUES
+('Jaan Kross', 1920),
+('Andrus Kivirähk', 1970),
+('Ene Mihkelson', 1944),
+('Viivi Luik', 1946),
+('Tõnu Õnnepalu', 1962);
+
+select * from Books
+select * from Authors
+
+
+
+CREATE TABLE city (
+    id INT PRIMARY KEY identity(1,1),
+    tegevus VARCHAR(10),
+    andmed TEXT,
+    kasutaja VARCHAR(100),
+    aeg DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TRIGGER trg_authors_insert
+ON authors
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO log (tegevus, tabeli_nimi, andmed, kasutaja, aeg)
+    SELECT
+        'INSERT',
+        'authors',
+        CONCAT('Lisatud author: ID=', inserted.author_id, ', nimi=', inserted.name, ', birthday=', inserted.birth_year),
+        SYSTEM_USER,
+        GETDATE()
+    FROM inserted;
+END;
+
+CREATE TRIGGER authors_update
+ON Authors
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO citulog (tegevus, tabeli_nimi, andmed, kasutaja, aeg)
+    SELECT 
+        'UPDATE',
+        'Authors',
+        'Update autors: ID=' + CAST(i.author_id AS NVARCHAR(10)) +
+        ', name: "' + ISNULL(d.name, '') + '" → "' + ISNULL(i.name, '') + '"' +
+        ', birthday: ' + CAST(ISNULL(d.birth_year, 0) AS NVARCHAR(10)) + ' → ' + CAST(ISNULL(i.birth_year, 0) AS NVARCHAR(10)),
+        SYSTEM_USER,
+        GETDATE()
+    FROM inserted i
+    INNER JOIN deleted d ON i.author_id = d.author_id;
+END;
+
+
+CREATE TRIGGER trg_authors_delete
+ON Authors
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO citulog (tegevus, tabeli_nimi, andmed, kasutaja, aeg)
+    SELECT 
+        'DELETE',
+        'Authors',
+        'birthday: ID=' + CAST(author_id AS NVARCHAR(10)) + ', name=' + ISNULL(name, ''),
+        SYSTEM_USER,
+        GETDATE()
+    FROM deleted;
+END;
+
+
+
+CREATE TRIGGER books_insert
+ON Books
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO citulog (tegevus, tabeli_nimi, andmed, kasutaja, aeg)
+    SELECT 
+        'INSERT',
+        'Books',
+        'added book: ID=' + CAST(book_id AS NVARCHAR(10)) + 
+        ', name="' + ISNULL(title, '') + '"' +
+        ', year=' + CAST(ISNULL(published_year, 0) AS NVARCHAR(10)) +
+        ', author ID=' + CAST(ISNULL(author_id, 0) AS NVARCHAR(10)),
+        SYSTEM_USER,
+        GETDATE()
+    FROM inserted;
+END;
+
+
+CREATE TRIGGER trg_books_update
+ON Books
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO citulog (tegevus, tabeli_nimi, andmed, kasutaja, aeg)
+    SELECT 
+        'UPDATE',
+        'Books',
+        'updated books: ID=' + CAST(i.book_id AS NVARCHAR(10)) +
+        ', named: "' + ISNULL(d.title, '') + '" → "' + ISNULL(i.title, '') + '"' +
+        ', year: ' + CAST(ISNULL(d.published_year, 0) AS NVARCHAR(10)) + ' → ' + CAST(ISNULL(i.published_year, 0) AS NVARCHAR(10)) +
+        ', authors ID: ' + CAST(ISNULL(d.author_id, 0) AS NVARCHAR(10)) + ' → ' + CAST(ISNULL(i.author_id, 0) AS NVARCHAR(10)),
+        SYSTEM_USER,
+        GETDATE()
+    FROM inserted i
+    INNER JOIN deleted d ON i.book_id = d.book_id;
+END;
+
+
+
+CREATE TRIGGER trg_books_delete
+ON Books
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO citulog (tegevus, tabeli_nimi, andmed, kasutaja, aeg)
+    SELECT 
+        'DELETE',
+        'Books',
+        'book deleted: ID=' + (book_id AS NVARCHAR(10)) + 
+        ', named="' + ISNULL(title, '') + '"' +
+        ', year=' + (ISNULL(published_year, 0) AS NVARCHAR(10)) +
+        ', author ID=' + (ISNULL(author_id, 0) AS NVARCHAR(10)),
+        SYSTEM_USER,
+        GETDATE()
+    FROM deleted;
+END;
